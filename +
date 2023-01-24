@@ -1,0 +1,1 @@
+g++ src/*.cpp -o tuto -Iinclude -L. -ltcod -Wl,-rpath=. -Wall -Wextra -std=c++17 -Wno-deprecated-declarations
