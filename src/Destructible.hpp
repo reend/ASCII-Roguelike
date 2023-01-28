@@ -9,6 +9,7 @@ public :
 	inline bool isDead() { return hp <= 0; }
 	float takeDamage(Actor *owner, float damage);
 	virtual void die(Actor *owner);
+	float heal(float amount);
 };
 
 class MonsterDestructible : public Destructible {
