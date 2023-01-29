@@ -68,7 +68,7 @@ void Map::dig(int x1, int y1, int x2, int y2) {
 }
 
 void Map::addMonster(int x, int y) {
-    TCODRandom *rng=TCODRandom::getInstance();
+	TCODRandom *rng=TCODRandom::getInstance();
     if ( rng->getInt(0,100) < 80 ) {
         // create an orc
         Actor *orc = new Actor(x,y,'o',"orc",
@@ -88,6 +88,40 @@ void Map::addMonster(int x, int y) {
     }
 }
 
+void Map::addItem(int x, int y) {
+	TCODRandom *rng=TCODRandom::getInstance();
+	int dice = rng->getInt(0,100);
+	if ( dice < 70 ) {
+		// create a health potion
+		Actor *healthPotion=new Actor(x,y,'!',"health potion",
+			TCODColor::violet);
+		healthPotion->blocks=false;
+		healthPotion->pickable=new Healer(4);
+		engine.actors.push(healthPotion);
+	} else if ( dice < 70+10 ) {
+		// create a scroll of lightning bolt 
+		Actor *scrollOfLightningBolt=new Actor(x,y,'#',"scroll of lightning bolt",
+			TCODColor::lightYellow);
+		scrollOfLightningBolt->blocks=false;
+		scrollOfLightningBolt->pickable=new LightningBolt(5,20);
+		engine.actors.push(scrollOfLightningBolt);
+	} else if ( dice < 70+10+10 ) {
+		// create a scroll of fireball
+		Actor *scrollOfFireball=new Actor(x,y,'#',"scroll of fireball",
+			TCODColor::lightYellow);
+		scrollOfFireball->blocks=false;
+		scrollOfFireball->pickable=new Fireball(3,12);
+		engine.actors.push(scrollOfFireball);
+	} else {
+		// create a scroll of confusion
+		Actor *scrollOfConfusion=new Actor(x,y,'#',"scroll of confusion",
+			TCODColor::lightYellow);
+		scrollOfConfusion->blocks=false;
+		scrollOfConfusion->pickable=new Confuser(10,8);
+		engine.actors.push(scrollOfConfusion);
+	}
+}
+
 void Map::createRoom(bool first, int x1, int y1, int x2, int y2) {
     dig (x1,y1,x2,y2);
     if ( first ) {
@@ -96,24 +130,26 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2) {
         engine.player->y=(y1+y2)/2;
     } else {
 		TCODRandom *rng=TCODRandom::getInstance();
+		// add monsters
 		int nbMonsters=rng->getInt(0,MAX_ROOM_MONSTERS);
 		while (nbMonsters > 0) {
 		    int x=rng->getInt(x1,x2);
 		    int y=rng->getInt(y1,y2);
-		    if ( canWalk(x,y) ) {
-		        addMonster(x,y);
-		    }
+    		if ( canWalk(x,y) ) {
+				addMonster(x,y);
+			}
 		    nbMonsters--;
 		}
-        int nbItems=rng->getInt(0,MAX_ROOM_ITEMS);
-        while (nbItems > 0) {
-            int x=rng->getInt(x1,x2);
-            int y=rng->getInt(y1,y2);
-            if ( canWalk(x,y) ) {
-                addItem(x,y);
-            }
-            nbItems--;
-        }
+		// add items
+		int nbItems=rng->getInt(0,MAX_ROOM_ITEMS);
+		while (nbItems > 0) {
+		    int x=rng->getInt(x1,x2);
+		    int y=rng->getInt(y1,y2);
+    		if ( canWalk(x,y) ) {
+				addItem(x,y);
+			}
+		    nbItems--;
+		}
     }
 }
 
@@ -155,14 +191,6 @@ bool Map::isInFov(int x, int y) const {
 void Map::computeFov() {
     map->computeFov(engine.player->x,engine.player->y,
         engine.fovRadius);
-}
-
-void Map::addItem(int x, int y) {
-    Actor *healthPotion=new Actor(x,y,'!',"health potion",
-        TCODColor::violet);
-    healthPotion->blocks=false;
-    healthPotion->pickable=new Healer(4);
-    engine.actors.push(healthPotion);
 }
 
 void Map::render() const {
