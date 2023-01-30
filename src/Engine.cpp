@@ -8,7 +8,7 @@ Engine::Engine(int screenWidth, int screenHeight) : gameStatus(STARTUP),
     gui = new Gui();
 }
 
-void Engine::init() { 
+void Engine::init() {
     player = new Actor(40,25,'@',"player",TCODColor::white);
     player->destructible=new PlayerDestructible(30,2,"your cadaver");
     player->attacker=new Attacker(5);
@@ -19,18 +19,28 @@ void Engine::init() {
     map->init(true);
     gui->message(TCODColor::red, 
     	"Welcome stranger!\nPrepare to perish in the Tombs of the Ancient Kings.");
+    gameStatus=STARTUP;
 }
 
 Engine::~Engine() {
+	term();
+    delete gui;
+}
+
+void Engine::term() {
     actors.clearAndDelete();
-    delete map;
-	delete gui;
+    if ( map ) delete map;
+    gui->clear();
 }
 
 void Engine::update() {
 	if ( gameStatus == STARTUP ) map->computeFov();
    	gameStatus=IDLE;
     TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS|TCOD_EVENT_MOUSE,&lastKey,&mouse);
+    if ( lastKey.vk == TCODK_ESCAPE ) {
+    	save();
+    	load();
+    }
     player->update();
     if ( gameStatus == NEW_TURN ) {
 	    for (Actor **iterator=actors.begin(); iterator != actors.end();
